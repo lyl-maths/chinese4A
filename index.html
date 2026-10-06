@@ -1,488 +1,532 @@
 <!DOCTYPE html>
-<html lang="zh-HK">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歷史與神話人物傳送門 - 小學互動對話平台</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>歷史與神話人物傳送門 - 小學四年級學習平台</title>
     <style>
+        :root {
+            --primary-color: #4A90E2;
+            --bg-color: #F4F7F6;
+            --card-bg: #FFFFFF;
+            --text-color: #2C3E50;
+            --accent-color: #FF9F43;
+        }
+
+        /* 角色主題顏色 */
+        body.theme-pangu {
+            --primary-color: #8B5A2B;
+            --bg-color: #F5EBE0;
+            --accent-color: #D4A373;
+        }
+        body.theme-qian {
+            --primary-color: #1D3557;
+            --bg-color: #E0E1DD;
+            --accent-color: #457B9D;
+        }
+        body.theme-lai {
+            --primary-color: #6C5CE7;
+            --bg-color: #F0EDFD;
+            --accent-color: #A29BFE;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "PingFang HK", "Traditional Chinese", "Microsoft JhengHei", sans-serif;
+        }
+
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #faf5ff 100%);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
+            padding: 15px;
+            transition: background-color 0.5s ease;
         }
-        .chat-scroll::-webkit-scrollbar {
-            width: 6px;
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
         }
-        .chat-scroll::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 9999px;
+
+        /* 頂部標題與設定區 */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.5s ease;
         }
-        .bounce-gentle {
-            animation: bounceGentle 2s infinite;
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        @keyframes bounceGentle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #FFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .title-text h1 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .title-text p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .settings-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* API Key 設定彈窗 */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        .modal-content h3 { margin-bottom: 15px; }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #CCC;
+            border-radius: 8px;
+        }
+
+        /* 對話內容區 */
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 1rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .bot .bubble {
+            background-color: #EBF3FA;
+            color: #2C3E50;
+            border-bottom-left-radius: 4px;
+        }
+
+        .user .bubble {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+            transition: background-color 0.5s ease;
+        }
+
+        /* ABC 快速按鈕區 */
+        .selection-panel {
+            padding: 15px;
+            background: #FAFAFA;
+            border-top: 1px solid #EEE;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .char-btn {
+            background: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .char-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 輸入區 */
+        .input-panel {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #EEE;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-panel input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #DDD;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-panel button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.5s ease;
+        }
+
+        .input-panel button:disabled {
+            background: #CCC;
+            cursor: not-allowed;
         }
     </style>
 </head>
-<body class="text-slate-800 flex flex-col min-h-screen">
+<body>
 
-    <!-- 頂部導航欄 -->
-    <header class="bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-gradient-to-tr from-sky-400 to-indigo-500 text-white p-2.5 rounded-2xl shadow-md">
-                    <i class="fa-solid font-bold fa-portal-exit text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-lg sm:text-xl bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
-                        歷史與神話人物傳送門
-                    </h1>
-                    <p class="text-xs text-slate-500 font-medium">香港小學小四（9-10歲）專屬學習平台</p>
-                </div>
+<div class="container">
+    <header>
+        <div class="header-info">
+            <div class="avatar" id="avatar">🚪</div>
+            <div class="title-text">
+                <h1 id="char-name">歷史與神話人物傳送門</h1>
+                <p id="char-title">歡迎小學四年級同學訪問</p>
             </div>
-            
-            <button onclick="toggleTeacherModal(true)" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all shadow-sm border border-amber-200">
-                <i class="fa-solid fa-chalkboard-user"></i>
-                <span>老師點樣提供俾學生？</span>
-            </button>
         </div>
+        <button class="settings-btn" onclick="toggleModal(true)">⚙️ 設定 API Key</button>
     </header>
 
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col">
-
-        <!-- 第一階段：角色選擇畫面 -->
-        <section id="selectionScreen" class="flex-1 flex flex-col justify-center py-6">
-            <div class="text-center mb-8">
-                <span class="inline-block bg-sky-100 text-sky-700 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-sky-200 bounce-gentle">
-                    🌟 歡迎嚟到跨越時空嘅傳送門！
-                </span>
-                <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">今日想跟邊一位傳奇人物傾吓計？</h2>
-                <p class="text-slate-600 text-sm max-w-md mx-auto">
-                    請用滑鼠或手指點擊下面其中一位人物，即可穿梭時空，進行一對一對話！
-                </p>
+    <div class="chat-box" id="chat-box">
+        <!-- 系統預設開場白 -->
+        <div class="message bot">
+            <div class="bubble">
+                各位四年級的小朋友，你好呀！歡迎來到「歷史與神話人物傳送門」！我是今天的時空導遊。今天有三位非常了不起的人物來到這裡，請點擊下方按鈕，選擇一位你想訪問的人物吧：
             </div>
-
-            <!-- 人物卡片區 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                
-                <!-- A. 盤古 -->
-                <div onclick="selectCharacter('pangu')" class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer border-2 border-amber-100 hover:border-amber-400 flex flex-col items-center text-center group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">A</div>
-                    <div class="w-24 h-24 rounded-2xl bg-amber-50 flex items-center justify-center text-5xl mb-4 group-hover:scale-105 transition-transform border border-amber-200 shadow-inner">
-                        ⛰️
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-1">開天闢地的盤古</h3>
-                    <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2.5 py-0.5 rounded-full mb-3">古代神話 • 沉穩老成</span>
-                    <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                        獨自喺黑暗中撐住天地幾萬年！體會「堅毅」同將身體化做萬物嘅「自我犧牲」。
-                    </p>
-                    <button class="mt-auto w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm">
-                        進入對話 <i class="fa-solid fa-comments ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- B. 錢學森 -->
-                <div onclick="selectCharacter('qian')" class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer border-2 border-blue-100 hover:border-blue-400 flex flex-col items-center text-center group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">B</div>
-                    <div class="w-24 h-24 rounded-2xl bg-blue-50 flex items-center justify-center text-5xl mb-4 group-hover:scale-105 transition-transform border border-blue-200 shadow-inner">
-                        🚀
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-1">航天巨匠錢學森</h3>
-                    <span class="text-xs bg-blue-100 text-blue-800 font-bold px-2.5 py-0.5 rounded-full mb-3">科技火箭 • 嚴謹睿智</span>
-                    <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                        放棄外國優渥生活，克服萬難回國。用一生奉獻科技，為航天事業打下基礎！
-                    </p>
-                    <button class="mt-auto w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm">
-                        進入對話 <i class="fa-solid fa-comments ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- C. 黎家盈 -->
-                <div onclick="selectCharacter('lai')" class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1.5 transition-all cursor-pointer border-2 border-purple-100 hover:border-purple-400 flex flex-col items-center text-center group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">C</div>
-                    <div class="w-24 h-24 rounded-2xl bg-purple-50 flex items-center justify-center text-5xl mb-4 group-hover:scale-105 transition-transform border border-purple-200 shadow-inner">
-                        👩‍🚀
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-1">港產女太空人黎家盈</h3>
-                    <span class="text-xs bg-purple-100 text-purple-800 font-bold px-2.5 py-0.5 rounded-full mb-3">太空探索 • 溫柔積極</span>
-                    <p class="text-xs text-slate-500 leading-relaxed mb-4">
-                        身為三孩之母，接受72小時不眠特訓與沙漠生存考驗！為夢想香港驕傲而戰！
-                    </p>
-                    <button class="mt-auto w-full bg-purple-500 hover:bg-purple-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors shadow-sm">
-                        進入對話 <i class="fa-solid fa-comments ml-1"></i>
-                    </button>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- 第二階段：對話視窗畫面 -->
-        <section id="chatScreen" class="hidden flex-1 flex flex-col bg-white rounded-3xl shadow-lg border border-slate-200/80 overflow-hidden max-h-[75vh]">
-            
-            <!-- 對話框頂部 Status Bar -->
-            <div id="chatHeader" class="bg-slate-800 text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700">
-                <div class="flex items-center space-x-3">
-                    <div id="charAvatar" class="w-11 h-11 rounded-2xl bg-slate-700 flex items-center justify-center text-2xl border border-slate-600 shadow-sm">
-                        🤖
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 id="charName" class="font-extrabold text-base">人物名字</h3>
-                            <span id="charTag" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-700 text-slate-200">標籤</span>
-                        </div>
-                        <p id="charStatus" class="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 線上對話中
-                        </p>
-                    </div>
-                </div>
-
-                <button onclick="backToSelection()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-2 rounded-xl transition-colors flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>返回選單</span>
-                </button>
-            </div>
-
-            <!-- 聊天訊息記錄區 -->
-            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-scroll space-y-4 bg-slate-50/50">
-                <!-- 訊息會動態插入此處 -->
-            </div>
-
-            <!-- 快捷提問按鈕區 (Quick Chips) -->
-            <div id="quickPromptsArea" class="px-4 py-2 bg-slate-100/80 border-t border-slate-200 flex gap-2 overflow-x-auto whitespace-nowrap">
-                <span class="text-xs font-bold text-slate-400 flex items-center gap-1 self-center shrink-0">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> 點擊發問：
-                </span>
-                <!-- 動態注入的按鈕 -->
-            </div>
-
-            <!-- 訊息輸入欄 -->
-            <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
-                <input 
-                    type="text" 
-                    id="userInput" 
-                    placeholder="輸入你想問嘅問題...（例如：你當時驚唔驚？）" 
-                    class="flex-1 bg-slate-100 text-slate-800 text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-sky-500 border border-transparent transition-all"
-                    onkeypress="handleKeyPress(event)"
-                />
-                <button 
-                    onclick="sendMessage()" 
-                    id="sendBtn" 
-                    class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold px-5 py-3 rounded-2xl transition-all shadow-md flex items-center justify-center"
-                >
-                    <i class="fa-solid fa-paper-plane text-sm"></i>
-                </button>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- 教師/學生分享教學 Modal -->
-    <div id="teacherModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
-            <button onclick="toggleTeacherModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl font-bold">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                </div>
-                <h3 class="text-xl font-extrabold text-slate-800">如何發放給學生使用？</h3>
-            </div>
-
-            <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-200">
-                    <h4 class="font-bold text-amber-900 mb-1">💡 方案 A：直接提供單一 HTML 檔案（最推薦）</h4>
-                    <p>您可以將此 `.html` 檔案直接上載至學校的 **Google Classroom、Teams 或校園 intranet**，學生下載後用瀏覽器雙擊即可直接開啟運作！</p>
-                </div>
-
-                <div class="p-3.5 bg-blue-50 rounded-2xl border border-blue-200">
-                    <h4 class="font-bold text-blue-900 mb-1">🌐 方案 B：免費部署網頁連結（可供全校開啟）</h4>
-                    <p>只需將此單一 HTML 檔上載至 **GitHub Pages**、**Netlify** 或 **Vercel** 等免費平台，即可獲取專屬網頁網址，直接分享 QR Code 俾小學生掃描使用。</p>
-                </div>
-
-                <div class="p-3.5 bg-purple-50 rounded-2xl border border-purple-200">
-                    <h4 class="font-bold text-purple-900 mb-1">🤖 關於 AI 對話 API KEY 設定</h4>
-                    <p>此網頁預設調用 Gemini Flash API。學校若有提供 API Key，可在網頁代碼中嵌入；若未輸入，系統亦內建智能備用對話回應，確保課堂流暢不受影響！</p>
-                </div>
-            </div>
-
-            <button onclick="toggleTeacherModal(false)" class="mt-6 w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 transition-colors">
-                我知道了，返回課堂
-            </button>
         </div>
     </div>
 
-    <script>
-        // Character Profiles Logic
-        const characters = {
-            pangu: {
-                name: "盤古",
-                title: "開天闢地神話巨人",
-                tag: "堅毅 • 自我犧牲",
-                avatar: "⛰️",
-                themeColor: "amber",
-                greeting: "哈囉小學員！我係開天闢地嘅盤古。當年我自己一個喺黑暗中用咗幾萬年撐住天地，真係好辛苦，但我冇放棄！你知唔知我最後變咗做啲咩？",
-                quickPrompts: [
-                    "你獨自撐住天地幾萬年，唔會覺得驚同累咩？",
-                    "點解你願意用身體化做世間萬物？",
-                    "你想對我地小學生講啲咩？"
-                ],
-                systemPrompt: `你現在扮演中國神話人物「盤古」。你正與香港小學四年級（9-10歲）學生對話。
-語氣設定：沉穩老成、慈祥親切。
-話題焦點：講述自己獨自支撐天地幾萬年的「堅毅」，以及最後用身體化為世間萬物的「自我犧牲」。
-嚴格限制：
-1. 每次回答【絕對不能超過 80 個字】！淺白、多用香港廣東話/口語（例如：唔、喺、咩、呀）。
-2. 只回答學生當前的提問。
-3. 每次回答完畢，【必須拋出一個簡短的問題】引導學生繼續問。`
-            },
-            qian: {
-                name: "錢學森",
-                title: "航天科學巨匠",
-                tag: "堅毅 • 愛國奉獻",
-                avatar: "🚀",
-                themeColor: "blue",
-                greeting: "小朋友你好！我係航天科學家錢學森。當年我放棄咗外國優厚嘅生活，克服重重困難先可以回國造火箭。你有冇想過，係咩力量支持我堅持落去？",
-                quickPrompts: [
-                    "你當時放棄優渥生活回國，唔會覺得可惜咩？",
-                    "遇到好難嘅科學難題，你點樣堅持落去？",
-                    "要怎樣做才可以成為一個厲害的科學家？"
-                ],
-                systemPrompt: `你現在扮演航天科學巨匠「錢學森」。你正與香港小學四年級（9-10歲）學生對話。
-語氣設定：嚴謹、智慧、有耐性、鼓勵學童。
-話題焦點：講述當年放棄美國優渥生活、克服重重阻撓回國的「堅毅」，以及為科技奉獻一生的「自我牺牲」。
-嚴格限制：
-1. 每次回答【絕對不能超過 80 個字】！淺白、廣東話口語（例如：呢、咗、咩、呀）。
-2. 只回答學生當前的提問。
-3. 每次回答完畢，【必須拋出一個簡短的問題】引導學生繼續問。`
-            },
-            lai: {
-                name: "黎家盈",
-                title: "港產首位女太空人",
-                tag: "堅毅 • 香港驕傲",
-                avatar: "👩‍🚀",
-                themeColor: "purple",
-                greeting: "哈囉！我係黎家盈，香港首位女太空人！我身為三個小朋友嘅媽媽，要忍受72小時不眠特訓同大沙漠生存訓練，過程好艱辛！你想聽下我嘅太空故事嗎？",
-                quickPrompts: [
-                    "要同小朋友分開去特訓，你當時心情點呀？",
-                    "72小時唔瞓覺嘅特訓，你點樣咬牙堅持？",
-                    "我哋小學生怎樣才可以實現自己的夢想？"
-                ],
-                systemPrompt: `你現在扮演港產首位女太空人「黎家盈」。你正與香港小學四年級（9-10歲）學生對話。
-語氣設定：溫柔、積極、親切（充滿香港廣東話口吻）。
-話題焦點：講述自己身為三孩之母，忍受 72 小時不眠特訓與大沙漠生存訓練的「堅毅」，以及必須與年幼子女分離、為航天夢想付出的「自我犧牲」。
-嚴格限制：
-1. 每次回答【絕對不能超過 80 個字】！淺白、多用香港廣東話/口語（例如：啱呀、唔緊要、呀、啦）。
-2. 只回答學生當前的提問。
-3. 每次回答完畢，【必須拋出一個簡短的問題】引導學生繼續問。`
-            }
-        };
+    <!-- 角色選擇按鈕（初期顯示） -->
+    <div class="selection-panel" id="selection-panel">
+        <button class="char-btn" onclick="selectCharacter('A')">
+            <span>👉</span> 【 A. 開天闢地的盤古 】
+        </button>
+        <button class="char-btn" onclick="selectCharacter('B')">
+            <span>👉</span> 【 B. 航天科學巨匠錢學森 】
+        </button>
+        <button class="char-btn" onclick="selectCharacter('C')">
+            <span>👉</span> 【 C. 港產首位女太空人黎家盈 】
+        </button>
+    </div>
 
-        let currentCharacterKey = null;
-        let chatHistory = [];
+    <!-- 文字輸入框（選定角色後顯示） -->
+    <div class="input-panel" id="input-panel" style="display: none;">
+        <input type="text" id="user-input" placeholder="請輸入你想問的問題..." onkeypress="handleKeyPress(event)">
+        <button id="send-btn" onclick="sendMessage()">發送</button>
+    </div>
+</div>
 
-        // Select Character Function
-        function selectCharacter(key) {
-            currentCharacterKey = key;
-            const char = characters[key];
+<!-- API 設定彈窗 -->
+<div class="modal" id="settings-modal">
+    <div class="modal-content">
+        <h3>API 設定</h3>
+        <label>API Provider:</label>
+        <select id="api-provider">
+            <option value="https://api.openai.com/v1/chat/completions">OpenAI (GPT-4o-mini)</option>
+            <option value="https://api.deepseek.com/chat/completions">DeepSeek</option>
+            <option value="custom">自訂 OpenAI 相容 Endpoint</option>
+        </select>
 
-            // Update UI elements
-            document.getElementById('charAvatar').textContent = char.avatar;
-            document.getElementById('charName').textContent = char.name;
-            document.getElementById('charTag').textContent = char.tag;
+        <label id="custom-url-label" style="display:none;">自訂 Endpoint URL:</label>
+        <input type="text" id="custom-endpoint" style="display:none;" placeholder="https://your-api-domain/v1/chat/completions">
 
-            // Render Quick Prompts
-            const promptsContainer = document.getElementById('quickPromptsArea');
-            promptsContainer.innerHTML = `<span class="text-xs font-bold text-slate-400 flex items-center gap-1 self-center shrink-0"><i class="fa-solid fa-wand-magic-sparkles"></i> 點擊發問：</span>`;
-            
-            char.quickPrompts.forEach(text => {
-                const btn = document.createElement('button');
-                btn.className = "text-xs bg-white hover:bg-sky-50 text-sky-700 font-semibold px-3 py-1.5 rounded-xl border border-sky-200 transition-colors shrink-0 shadow-sm";
-                btn.textContent = text;
-                btn.onclick = () => {
-                    document.getElementById('userInput').value = text;
-                    sendMessage();
-                };
-                promptsContainer.appendChild(btn);
-            });
+        <label>Model 名稱:</label>
+        <input type="text" id="api-model" value="gpt-4o-mini" placeholder="例如: gpt-4o-mini 或 deepseek-chat">
 
-            // Switch Screen
-            document.getElementById('selectionScreen').classList.add('hidden');
-            document.getElementById('chatScreen').classList.remove('hidden');
+        <label>API Key:</label>
+        <input type="password" id="api-key" placeholder="sk-...">
 
-            // Reset Chat Messages & Add Greeting
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = '';
-            
-            chatHistory = [
-                { role: "user", parts: [{ text: "你好！" }] },
-                { role: "model", parts: [{ text: char.greeting }] }
-            ];
+        <button style="width: 100%; padding: 10px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="saveSettings()">儲存並關閉</button>
+    </div>
+</div>
 
-            appendMessage(char.name, char.greeting, 'bot', char.avatar);
+<script>
+    // 預設系統參數
+    let apiKey = localStorage.getItem('portal_api_key') || '';
+    let apiProvider = localStorage.getItem('portal_api_provider') || 'https://api.openai.com/v1/chat/completions';
+    let apiModel = localStorage.getItem('portal_api_model') || 'gpt-4o-mini';
+
+    let selectedCharacter = '';
+    let chatHistory = [];
+    let askedQuestions = new Set(); // 記錄同學問過的問題，防止重複回答
+
+    // 嚴密 System Prompt 設定
+    const systemPrompts = {
+        'A': `你現在是神話人物【盤古】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+【核心人設與價值觀】
+- 語氣：沉穩、老成、慈祥、充滿長者智慧。
+- 核心價值：展現獨自支撐天地幾萬年的「堅毅」，以及最終身體化為世間萬物（眼睛變日月、血液變江河）的「自我犧牲」精神。
+- 寫作/中文教學要求：對話中請自然融入小四中文「描寫手法」（例如感官描寫：看見漆黑、聽見雷聲；動作描寫：咬緊牙關、用盡全力推開；比喻/排比）。
+
+【對話嚴格限制】
+1. 語言：正統繁體書面語（帶親切口語感），語氣適合小四學生。
+2. 字數：每次回答【絕對控制在 80 至 120 字之間】，簡短精鍊。
+3. 句型靈活：靈活回答，不要每次重複相同句型，可以適時（而非每句）拋出簡短問題引導學生。
+4. 安全與合規（底線）：
+   - 絕對不涉及國家安全敏感話題、零粗口、零不良內容。
+   - 所有回答必須傳遞正面、光明、積極的價值觀。
+5. 防重複與專注提示：
+   - 若學生重複問同一個問題，請親切提醒：「這個問題我剛才回答過你囉～」，並引導他問新問題。
+   - 若學生問了無關、不當或不符合邏輯的問題（Reply/偏題），請不要直接回答該問題，溫柔提醒學生：「我們要專心討論歷史與神話故事啊，你還想知道我的什麼故事呢？」`,
+
+        'B': `你現在是科學家【錢學森】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+【核心人設與價值觀】
+- 語氣：嚴謹、充滿智慧、溫和且對下一代充滿希望。
+- 核心價值：講述當年放棄美國優厚生活、克服重重阻撓與艱難回國的「堅毅」，以及為國家科技奉獻一生的「自我修養與自我犧牲」。
+- 國家自豪感：激發學生對國家航天與科技成就的自豪感，展現中國人憑智慧與毅力立足世界的驕傲。
+- 寫作/中文教學要求：自然融入小四中文「描寫手法」（例如心理描寫：思念家鄉的心情；動作描寫：克服困難、夜以繼日地研究）。
+
+【對話嚴格限制】
+1. 語言：正統繁體書面語（帶親切口語感），語氣適合小四學生。
+2. 字數：每次回答【絕對控制在 80 至 120 字之間】，簡短精鍊。
+3. 句型靈活：靈活回答，不要每次重複相同句型，可以適時（而非每句）拋出簡短問題引導學生。
+4. 安全與合規（底線）：
+   - 絕對不涉及國家安全敏感話題、零粗口、零不良內容。
+   - 所有回答必須傳遞正面、光明、積極的價值觀。
+5. 防重複與專注提示：
+   - 若學生重複問同一個問題，請親切提醒：「這個問題我剛才回答過你囉～」，並引導他問新問題。
+   - 若學生問了無關、不當或不符合邏輯的問題（Reply/偏題），請不要直接回答該問題，溫柔提醒學生：「我們要專心討論科學與國家航天故事啊，你還想知道我的什麼故事呢？」`,
+
+        'C': `你現在是香港首位女航天員【黎家盈】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+【核心人設與價值觀】
+- 語氣：溫柔、積極、親切、勇敢（帶有香港本土成長背景的親切感）。
+- 核心價值：講述身為三個孩子的母親，忍受 72 小時不眠特訓與大沙漠生存訓練的「堅毅」，以及必須與年幼子女分離、為國家航天夢想付出的「自我犧牲」。
+- 國家自豪感：展現代表香港與國家一步步邁向太空的驕傲，激發身為香港人與中國人的自豪感。
+- 寫作/中文教學要求：自然融入小四中文「描寫手法」（例如感官描寫：沙漠烈日、太空無重力感；心理描寫：對孩子的思念與對夢想的堅持）。
+
+【對話嚴格限制】
+1. 語言：正統繁體書面語（帶親切口語感），語氣適合小四學生。
+2. 字數：每次回答【絕對控制在 80 至 120 字之間】，簡短精鍊。
+3. 句型靈活：靈活回答，不要每次重複相同句型，可以適時（而非每句）拋出簡短問題引導學生。
+4. 安全與合規（底線）：
+   - 絕對不涉及國家安全敏感話題、零粗口、零不良內容。
+   - 所有回答必須傳遞正面、光明、積極的價值觀。
+5. 防重複與專注提示：
+   - 若學生重複問同一個問題，請親切提醒：「這個問題我剛才回答過你囉～」，並引導他問新問題。
+   - 若學生問了無關、不當或不符合邏輯的問題（Reply/偏題），請不要直接回答該問題，溫柔提醒學生：「我們要專心討論航天訓練與夢想故事啊，你還想知道我的什麼故事呢？」`
+    };
+
+    // 介面與主題切換
+    function selectCharacter(type) {
+        selectedCharacter = type;
+        document.getElementById('selection-panel').style.display = 'none';
+        document.getElementById('input-panel').style.display = 'flex';
+
+        const body = document.body;
+        body.className = ''; // 清除舊主題
+
+        let greetingText = '';
+        if (type === 'A') {
+            body.classList.add('theme-pangu');
+            document.getElementById('avatar').innerText = '🌌';
+            document.getElementById('char-name').innerText = '開天闢地的盤古';
+            document.getElementById('char-title').innerText = '神話傳奇人物';
+            greetingText = '小朋友，你好！我是盤古。很久很久以前，天地還是一片漆黑混沌，是我用雙手雙腳把它們撐開的。你想知道我當時有多堅毅，或者我是怎樣用身體化為世間萬物的嗎？';
+        } else if (type === 'B') {
+            body.classList.add('theme-qian');
+            document.getElementById('avatar').innerText = '🚀';
+            document.getElementById('char-name').innerText = '航天科學巨匠錢學森';
+            document.getElementById('char-title').innerText = '國家科技先驅';
+            greetingText = '四年級的小朋友們，你們好！我是錢學森。當年我克服了無數困難，堅持回到祖國，為我們的國家發展航天事業。很高興見到你們，你想問我關於科學研究還是回國的故事呢？';
+        } else if (type === 'C') {
+            body.classList.add('theme-lai');
+            document.getElementById('avatar').innerText = '👩‍🚀';
+            document.getElementById('char-name').innerText = '港產首位女太空人黎家盈';
+            document.getElementById('char-title').innerText = '香港的驕傲';
+            greetingText = '你好呀！我是黎家盈。作為三個孩子的媽媽，也是香港第一位女航天員，我經歷了非常嚴格的特訓。你想知道我是怎樣堅持過來的，還是太空中的奇妙生活呢？';
         }
 
-        function backToSelection() {
-            document.getElementById('chatScreen').classList.add('hidden');
-            document.getElementById('selectionScreen').classList.remove('hidden');
-            currentCharacterKey = null;
+        // 初始化對話歷史
+        chatHistory = [
+            { role: 'system', content: systemPrompts[type] },
+            { role: 'assistant', content: greetingText }
+        ];
+
+        appendMessage('bot', greetingText);
+    }
+
+    function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chat-box');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerText = text;
+
+        msgDiv.appendChild(bubble);
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const inputEl = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const text = inputEl.value.trim();
+
+        if (!text) return;
+        if (!apiKey) {
+            alert('請先點擊右上角「設定 API Key」輸入 API 金鑰！');
+            toggleModal(true);
+            return;
         }
 
-        function appendMessage(sender, text, type, avatarSymbol) {
-            const chatMessages = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `flex gap-3 ${type === 'user' ? 'justify-end' : 'justify-start'}`;
+        // 渲染使用者輸入
+        appendMessage('user', text);
+        inputEl.value = '';
+        inputEl.disabled = true;
+        sendBtn.disabled = true;
 
-            const avatarHtml = type === 'bot' 
-                ? `<div class="w-8 h-8 rounded-xl bg-slate-200 flex items-center justify-center text-lg shrink-0 border border-slate-300">${avatarSymbol}</div>`
-                : '';
+        chatHistory.push({ role: 'user', content: text });
 
-            const userAvatarHtml = type === 'user'
-                ? `<div class="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center text-sm font-bold shrink-0">你</div>`
-                : '';
+        try {
+            let endpoint = apiProvider === 'custom' ? document.getElementById('custom-endpoint').value : apiProvider;
 
-            const bubbleClass = type === 'user'
-                ? 'bg-sky-500 text-white rounded-2xl rounded-tr-none px-4 py-2.5 text-sm shadow-sm max-w-[80%]'
-                : 'bg-white text-slate-800 rounded-2xl rounded-tl-none px-4 py-2.5 text-sm shadow-sm border border-slate-200/80 max-w-[80%] leading-relaxed';
-
-            msgDiv.innerHTML = `
-                ${avatarHtml}
-                <div class="${bubbleClass}">
-                    <p>${escapeHtml(text)}</p>
-                </div>
-                ${userAvatarHtml}
-            `;
-
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Send Message Handler
-        async function sendMessage() {
-            const inputEl = document.getElementById('userInput');
-            const userText = inputEl.value.trim();
-            if (!userText || !currentCharacterKey) return;
-
-            const char = characters[currentCharacterKey];
-
-            // Render User Message
-            appendMessage('你', userText, 'user');
-            inputEl.value = '';
-
-            // Render Loading Indicator
-            const loadingId = appendLoadingIndicator(char.avatar);
-
-            // Call Gemini API
-            try {
-                const apiResponseText = await fetchGeminiResponse(userText, char);
-                removeLoadingIndicator(loadingId);
-                appendMessage(char.name, apiResponseText, 'bot', char.avatar);
-            } catch (err) {
-                console.warn("API Call Failed, falling back to local response logic:", err);
-                removeLoadingIndicator(loadingId);
-                const fallbackText = getFallbackResponse(userText, char);
-                appendMessage(char.name, fallbackText, 'bot', char.avatar);
-            }
-        }
-
-        // Fetch Response from Gemini API
-        async function fetchGeminiResponse(userQuery, char) {
-            const apiKey = ""; // Runtime automatically provides key when left empty
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-            chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
-
-            const payload = {
-                contents: chatHistory,
-                systemInstruction: {
-                    parts: [{ text: char.systemPrompt }]
-                }
-            };
-
-            const response = await fetch(apiUrl, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: apiModel,
+                    messages: chatHistory,
+                    temperature: 0.7,
+                    max_tokens: 250
+                })
             });
-
-            if (!response.ok) throw new Error("Network response was not ok");
 
             const data = await response.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-            if (text) {
-                chatHistory.push({ role: "model", parts: [{ text: text }] });
-                return text;
+            if (data.choices && data.choices[0]) {
+                const reply = data.choices[0].message.content;
+                appendMessage('bot', reply);
+                chatHistory.push({ role: 'assistant', content: reply });
             } else {
-                throw new Error("Invalid output format");
+                appendMessage('bot', '【提示】連線出現問題，請檢查 API Key 或 Endpoint 設定。');
             }
+        } catch (err) {
+            console.error(err);
+            appendMessage('bot', '【提示】網路連線失敗，請稍後再試。');
+        } finally {
+            inputEl.disabled = false;
+            sendBtn.disabled = false;
+            inputEl.focus();
         }
+    }
 
-        // Fallback Logic if API Key fails or Offline
-        function getFallbackResponse(userQuery, char) {
-            if (currentCharacterKey === 'pangu') {
-                return "撐住天地雖然又攰又孤單，但見到天地形成，我就覺得好值得！為咗世界有山有河，我用身體化做萬物。你平時有冇遇到需要堅持嘅事？";
-            } else if (currentCharacterKey === 'qian') {
-                return "放棄國外優厚生活雖然可惜，但回國造火箭係我嘅理想！只要有堅毅嘅心，幾難嘅科學問題都可以解開。你長大後想做咩呢？";
-            } else {
-                return "同小朋友分開特訓真係好難過，但為咗太空夢，一定要堅持！72小時不眠訓練考驗嘅係意志力。你有冇啲好想實現嘅夢想呀？";
-            }
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
         }
+    }
 
-        function appendLoadingIndicator(avatarSymbol) {
-            const chatMessages = document.getElementById('chatMessages');
-            const id = 'loading-' + Date.now();
-            const div = document.createElement('div');
-            div.id = id;
-            div.className = 'flex gap-3 justify-start items-center';
-            div.innerHTML = `
-                <div class="w-8 h-8 rounded-xl bg-slate-200 flex items-center justify-center text-lg shrink-0 border border-slate-300">${avatarSymbol}</div>
-                <div class="bg-white rounded-2xl rounded-tl-none px-4 py-3 shadow-sm border border-slate-200 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-bounce"></span>
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-bounce [animation-delay:0.2s]"></span>
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-bounce [animation-delay:0.4s]"></span>
-                </div>
-            `;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            return id;
+    // Modal 與 設定控制
+    function toggleModal(show) {
+        document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
+        if (show) {
+            document.getElementById('api-key').value = apiKey;
+            document.getElementById('api-provider').value = apiProvider.includes('http') ? apiProvider : 'custom';
+            document.getElementById('api-model').value = apiModel;
         }
+    }
 
-        function removeLoadingIndicator(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-        }
+    function saveSettings() {
+        apiKey = document.getElementById('api-key').value.trim();
+        const providerSelect = document.getElementById('api-provider').value;
+        apiProvider = providerSelect === 'custom' ? document.getElementById('custom-endpoint').value.trim() : providerSelect;
+        apiModel = document.getElementById('api-model').value.trim() || 'gpt-4o-mini';
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        localStorage.setItem('portal_api_key', apiKey);
+        localStorage.setItem('portal_api_provider', apiProvider);
+        localStorage.setItem('portal_api_model', apiModel);
 
-        function toggleTeacherModal(show) {
-            const modal = document.getElementById('teacherModal');
-            if (show) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
-        }
+        toggleModal(false);
+    }
 
-        function escapeHtml(string) {
-            return String(string).replace(/[&<>"']/g, function (s) {
-                return {
-                    "&": "&amp;",
-                    "<": "&lt;",
-                    ">": "&gt;",
-                    '"': "&quot;",
-                    "'": "&#39;"
-                }[s];
-            });
-        }
-    </script>
+    document.getElementById('api-provider').addEventListener('change', function(e) {
+        const isCustom = e.target.value === 'custom';
+        document.getElementById('custom-url-label').style.display = isCustom ? 'block' : 'none';
+        document.getElementById('custom-endpoint').style.display = isCustom ? 'block' : 'none';
+    });
+</script>
+
 </body>
 </html>
-
