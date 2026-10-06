@@ -39,7 +39,7 @@
         <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="bg-gradient-to-tr from-sky-400 to-indigo-500 text-white p-2.5 rounded-2xl shadow-md">
-                    <i class="fa-solid font-bold fa-portal-exit text-xl"></i>
+                    <i class="fa-solid fa-door-open text-xl"></i>
                 </div>
                 <div>
                     <h1 class="font-extrabold text-lg sm:text-xl bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
@@ -49,10 +49,16 @@
                 </div>
             </div>
             
-            <button onclick="toggleTeacherModal(true)" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all shadow-sm border border-amber-200">
-                <i class="fa-solid fa-chalkboard-user"></i>
-                <span>老師點樣提供俾學生？</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="openApiKeyModal()" class="flex items-center gap-1.5 bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all shadow-sm border border-sky-200">
+                    <i class="fa-solid fa-key"></i>
+                    <span class="hidden sm:inline">設定 API Key</span>
+                </button>
+                <button onclick="toggleTeacherModal(true)" class="flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl transition-all shadow-sm border border-amber-200">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span>老師點樣提供俾學生？</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -125,7 +131,7 @@
         </section>
 
         <!-- 第二階段：對話視窗畫面 -->
-        <section id="chatScreen" class="hidden flex-1 flex flex-col bg-white rounded-3xl shadow-lg border border-slate-200/80 overflow-hidden max-h-[75vh]">
+        <section id="chatScreen" class="hidden flex-1 flex flex-col bg-white rounded-3xl shadow-lg border border-slate-200/80 overflow-hidden min-h-[500px]">
             
             <!-- 對話框頂部 Status Bar -->
             <div id="chatHeader" class="bg-slate-800 text-white px-5 py-3.5 flex items-center justify-between border-b border-slate-700">
@@ -151,7 +157,7 @@
             </div>
 
             <!-- 聊天訊息記錄區 -->
-            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-scroll space-y-4 bg-slate-50/50">
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto chat-scroll space-y-4 bg-slate-50/50 min-h-[300px]">
                 <!-- 訊息會動態插入此處 -->
             </div>
 
@@ -211,13 +217,49 @@
 
                 <div class="p-3.5 bg-purple-50 rounded-2xl border border-purple-200">
                     <h4 class="font-bold text-purple-900 mb-1">🤖 關於 AI 對話 API KEY 設定</h4>
-                    <p>此網頁預設調用 Gemini Flash API。學校若有提供 API Key，可在網頁代碼中嵌入；若未輸入，系統亦內建智能備用對話回應，確保課堂流暢不受影響！</p>
+                    <p>網頁預設自動調用 Gemini API。老師可以在右上角自訂輸入 Gemini API Key；若未設置或網路有阻擋，系統亦內建智能備用對話（Fallback Response），確保課堂教學順暢不卡關！</p>
                 </div>
             </div>
 
             <button onclick="toggleTeacherModal(false)" class="mt-6 w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700 transition-colors">
                 我知道了，返回課堂
             </button>
+        </div>
+    </div>
+
+    <!-- API Key 設定 Modal -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-800">設定 Gemini API Key</h3>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+                老師或使用者可自訂輸入 Google Gemini API Key。若不輸入，系統將使用預設設定或自動啟用備用模式。
+            </p>
+
+            <input 
+                type="password" 
+                id="customApiKeyInput" 
+                placeholder="貼上你的 API Key (AIzaSy...)" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 mb-4"
+            />
+
+            <div class="flex gap-2">
+                <button onclick="saveApiKey()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 rounded-xl transition-colors text-sm">
+                    儲存設定
+                </button>
+                <button onclick="clearApiKey()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2.5 rounded-xl transition-colors text-sm">
+                    清除
+                </button>
+            </div>
         </div>
     </div>
 
@@ -288,6 +330,7 @@
 
         let currentCharacterKey = null;
         let chatHistory = [];
+        let userCustomApiKey = localStorage.getItem('gemini_api_key') || "";
 
         // Select Character Function
         function selectCharacter(key) {
@@ -380,9 +423,9 @@
             // Render Loading Indicator
             const loadingId = appendLoadingIndicator(char.avatar);
 
-            // Call Gemini API
+            // Call Gemini API with Retry Mechanism
             try {
-                const apiResponseText = await fetchGeminiResponse(userText, char);
+                const apiResponseText = await fetchGeminiResponseWithRetry(userText, char);
                 removeLoadingIndicator(loadingId);
                 appendMessage(char.name, apiResponseText, 'bot', char.avatar);
             } catch (err) {
@@ -393,36 +436,44 @@
             }
         }
 
-        // Fetch Response from Gemini API
-        async function fetchGeminiResponse(userQuery, char) {
-            const apiKey = ""; // Runtime automatically provides key when left empty
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        // Fetch Response from Gemini API with Exponential Backoff
+        async function fetchGeminiResponseWithRetry(userQuery, char, retries = 3, delay = 1000) {
+            const apiKey = userCustomApiKey || "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-            chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
+            const newHistory = [...chatHistory, { role: "user", parts: [{ text: userQuery }] }];
 
             const payload = {
-                contents: chatHistory,
+                contents: newHistory,
                 systemInstruction: {
                     parts: [{ text: char.systemPrompt }]
                 }
             };
 
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-            if (!response.ok) throw new Error("Network response was not ok");
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-            const data = await response.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const data = await response.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-            if (text) {
-                chatHistory.push({ role: "model", parts: [{ text: text }] });
-                return text;
-            } else {
-                throw new Error("Invalid output format");
+                    if (text) {
+                        chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
+                        chatHistory.push({ role: "model", parts: [{ text: text }] });
+                        return text;
+                    } else {
+                        throw new Error("Invalid output format from API");
+                    }
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                }
             }
         }
 
@@ -471,6 +522,34 @@
             else modal.classList.add('hidden');
         }
 
+        // API Key Modal Controls
+        function openApiKeyModal() {
+            document.getElementById('customApiKeyInput').value = userCustomApiKey;
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('customApiKeyInput').value.trim();
+            userCustomApiKey = val;
+            if (val) {
+                localStorage.setItem('gemini_api_key', val);
+            } else {
+                localStorage.removeItem('gemini_api_key');
+            }
+            closeApiKeyModal();
+        }
+
+        function clearApiKey() {
+            userCustomApiKey = "";
+            localStorage.removeItem('gemini_api_key');
+            document.getElementById('customApiKeyInput').value = "";
+            closeApiKeyModal();
+        }
+
         function escapeHtml(string) {
             return String(string).replace(/[&<>"']/g, function (s) {
                 return {
@@ -485,4 +564,3 @@
     </script>
 </body>
 </html>
-
