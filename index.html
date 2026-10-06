@@ -152,7 +152,7 @@
         .message {
             display: flex;
             flex-direction: column;
-            max-width: 80%;
+            max-width: 85%;
         }
 
         .message.bot {
@@ -184,7 +184,7 @@
             transition: background-color 0.5s ease;
         }
 
-        /* ABC 快速按鈕區 */
+        /* ABC 角色選擇面板 */
         .selection-panel {
             padding: 15px;
             background: #FAFAFA;
@@ -213,6 +213,48 @@
         .char-btn:hover {
             background: var(--primary-color);
             color: white;
+        }
+
+        /* SEN 預設問題快捷列 */
+        .quick-questions-container {
+            padding: 8px 15px;
+            background: #F8F9FA;
+            border-top: 1px solid #E9ECEF;
+            display: none; /* 選擇角色後顯示 */
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .quick-title {
+            font-size: 0.8rem;
+            color: #6C757D;
+            font-weight: bold;
+        }
+
+        .quick-chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        .chip-btn {
+            background-color: #E2E8F0;
+            color: #2D3748;
+            border: 1px solid #CBD5E0;
+            border-radius: 16px;
+            padding: 6px 14px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .chip-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
 
         /* 輸入區 */
@@ -262,7 +304,7 @@
                 <p id="char-title">歡迎小學四年級同學訪問</p>
             </div>
         </div>
-        <button class="settings-btn" onclick="toggleModal(true)">⚙️ 設定 API Key</button>
+        <button class="settings-btn" onclick="toggleModal(true)">⚙️️ 設定 API Key</button>
     </header>
 
     <div class="chat-box" id="chat-box">
@@ -287,9 +329,17 @@
         </button>
     </div>
 
+    <!-- SEN 預設問題快捷按鈕區 -->
+    <div class="quick-questions-container" id="quick-panel">
+        <span class="quick-title">💡 提示按鈕（不知道問甚麼？點擊直接發問）：</span>
+        <div class="quick-chips" id="quick-chips">
+            <!-- 動態生成預設問題 -->
+        </div>
+    </div>
+
     <!-- 文字輸入框（選定角色後顯示） -->
     <div class="input-panel" id="input-panel" style="display: none;">
-        <input type="text" id="user-input" placeholder="請輸入你想問的問題..." onkeypress="handleKeyPress(event)">
+        <input type="text" id="user-input" placeholder="請輸入你想問的問題，或點擊上方提示按鈕..." onkeypress="handleKeyPress(event)">
         <button id="send-btn" onclick="sendMessage()">發送</button>
     </div>
 </div>
@@ -326,14 +376,35 @@
 
     let selectedCharacter = '';
     let chatHistory = [];
-    let askedQuestions = new Set(); // 記錄同學問過的問題，防止重複回答
+
+    // SEN 專屬預設問題庫
+    const presetQuestions = {
+        'A': [
+            '支撐天地幾萬年，你當時有甚麼感受？',
+            '你是怎樣用身體變成美麗的世界的？',
+            '遇到這麼大的困難，你為甚麼能堅持下去？',
+            '你想對我們四年級的小朋友說甚麼鼓勵的話？'
+        ],
+        'B': [
+            '放棄美國優厚生活回國，你當時捨得嗎？',
+            '克服困難回國的過程，你心裡是怎樣想的？',
+            '看到國家航天成功，你有甚麼感覺？',
+            '怎樣才能像你一樣成為優秀的科學家？'
+        ],
+        'C': [
+            '72小時不眠特訓這麼辛苦，你是怎樣堅持的？',
+            '身為三個孩子的媽媽，要離開子女訓練捨得嗎？',
+            '代表香港和國家飛向太空，你感到自豪嗎？',
+            '在太空看見地球時，你當時看見了甚麼景象？'
+        ]
+    };
 
     // 嚴密 System Prompt 設定
     const systemPrompts = {
-        'A': `你現在是神話人物【盤古】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+        'A': `你現在是神話人物【盤古】。你正在接受香港小學四年級（9-10歲，含SEN學生）的訪問。
 【核心人設與價值觀】
 - 語氣：沉穩、老成、慈祥、充滿長者智慧。
-- 核心價值：展現獨自支撐天地幾萬年的「堅毅」，以及最終身體化為世間萬物（眼睛變日月、血液變江河）的「自我犧牲」精神。
+- 核心價值：展現獨自支撐天地幾萬年的「堅毅」，以及最終身體化為世間萬物的「自我犧牲」精神。
 - 寫作/中文教學要求：對話中請自然融入小四中文「描寫手法」（例如感官描寫：看見漆黑、聽見雷聲；動作描寫：咬緊牙關、用盡全力推開；比喻/排比）。
 
 【對話嚴格限制】
@@ -347,7 +418,7 @@
    - 若學生重複問同一個問題，請親切提醒：「這個問題我剛才回答過你囉～」，並引導他問新問題。
    - 若學生問了無關、不當或不符合邏輯的問題（Reply/偏題），請不要直接回答該問題，溫柔提醒學生：「我們要專心討論歷史與神話故事啊，你還想知道我的什麼故事呢？」`,
 
-        'B': `你現在是科學家【錢學森】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+        'B': `你現在是科學家【錢學森】。你正在接受香港小學四年級（9-10歲，含SEN學生）的訪問。
 【核心人設與價值觀】
 - 語氣：嚴謹、充滿智慧、溫和且對下一代充滿希望。
 - 核心價值：講述當年放棄美國優厚生活、克服重重阻撓與艱難回國的「堅毅」，以及為國家科技奉獻一生的「自我修養與自我犧牲」。
@@ -365,7 +436,7 @@
    - 若學生重複問同一個問題，請親切提醒：「這個問題我剛才回答過你囉～」，並引導他問新問題。
    - 若學生問了無關、不當或不符合邏輯的問題（Reply/偏題），請不要直接回答該問題，溫柔提醒學生：「我們要專心討論科學與國家航天故事啊，你還想知道我的什麼故事呢？」`,
 
-        'C': `你現在是香港首位女航天員【黎家盈】。你正在接受香港小學四年級（9-10歲）學生的訪問。
+        'C': `你現在是香港首位女航天員【黎家盈】。你正在接受香港小學四年級（9-10歲，含SEN學生）的訪問。
 【核心人設與價值觀】
 - 語氣：溫柔、積極、親切、勇敢（帶有香港本土成長背景的親切感）。
 - 核心價值：講述身為三個孩子的母親，忍受 72 小時不眠特訓與大沙漠生存訓練的「堅毅」，以及必須與年幼子女分離、為國家航天夢想付出的「自我犧牲」。
@@ -389,6 +460,7 @@
         selectedCharacter = type;
         document.getElementById('selection-panel').style.display = 'none';
         document.getElementById('input-panel').style.display = 'flex';
+        document.getElementById('quick-panel').style.display = 'flex';
 
         const body = document.body;
         body.className = ''; // 清除舊主題
@@ -414,6 +486,9 @@
             greetingText = '你好呀！我是黎家盈。作為三個孩子的媽媽，也是香港第一位女航天員，我經歷了非常嚴格的特訓。你想知道我是怎樣堅持過來的，還是太空中的奇妙生活呢？';
         }
 
+        // 初始化預設問題按鈕
+        renderQuickQuestions(type);
+
         // 初始化對話歷史
         chatHistory = [
             { role: 'system', content: systemPrompts[type] },
@@ -421,6 +496,24 @@
         ];
 
         appendMessage('bot', greetingText);
+    }
+
+    // 動態生成 SEN 預設問題按鈕
+    function renderQuickQuestions(type) {
+        const chipsContainer = document.getElementById('quick-chips');
+        chipsContainer.innerHTML = ''; // 清空
+
+        const questions = presetQuestions[type] || [];
+        questions.forEach(q => {
+            const btn = document.createElement('button');
+            btn.className = 'chip-btn';
+            btn.innerText = q;
+            btn.onclick = () => {
+                document.getElementById('user-input').value = q;
+                sendMessage();
+            };
+            chipsContainer.appendChild(btn);
+        });
     }
 
     function appendMessage(sender, text) {
